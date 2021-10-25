@@ -194,7 +194,7 @@ export default {
                   {
                     y: item / 2.2,
                   },
-                  300
+                  50
                 )
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .onUpdate(data => {
