@@ -139,11 +139,17 @@ export default {
           content: audioList[playerStatus.value.activeIndex].title,
         });
       }
-      createAudio();
+      text.set({
+        content: audioList[playerStatus.value.activeIndex].title,
+      });
+      // createAudio();
 
       document.querySelector('#play').addEventListener('click', function () {
         playerStatus.value.playing = !playerStatus.value.playing;
         if (playerStatus.value.playing) {
+          if (!audio) {
+            createAudio();
+          }
           audio.play();
         } else {
           audio.pause();
