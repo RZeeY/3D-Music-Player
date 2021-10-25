@@ -185,7 +185,7 @@ export default {
         requestAnimationFrame(animate);
         if (audioAnalyser) {
           audioAnalyser.getByteFrequencyData(audioOutput);
-          if (getAudioDataStep % 8 === 0) {
+          if (getAudioDataStep % 1 === 0) {
             audioOutput.forEach((item, index) => {
               new TWEEN.Tween({
                 y: group.children[index].scale.y,
