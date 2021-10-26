@@ -56,9 +56,9 @@ export default {
       renderer.setSize(mainContainer.clientWidth, mainContainer.clientHeight);
       mainContainer.appendChild(renderer.domElement);
 
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.minDistance = 100;
-      controls.maxDistance = 1200;
+      // const controls = new OrbitControls(camera, renderer.domElement);
+      // controls.minDistance = 100;
+      // controls.maxDistance = 1200;
 
       // 计算刻度坐标
       // x1 = x0 + r * cos(ao * PI / 180)
@@ -126,11 +126,19 @@ export default {
       let audio = null;
       let audioOutput = null;
       let audioAnalyser = null;
+      let audioContext = null;
+      let audioSource = null;
 
       function createAudio() {
+        if (audio) {
+          audio = null;
+          audioSource = null;
+          audioContext.close();
+          audioContext = null;
+        }
         audio = new Audio(audioList[playerStatus.value.activeIndex].url);
-        let audioContext = new AudioContext(audio);
-        let audioSource = audioContext.createMediaElementSource(audio);
+        audioContext = new AudioContext(audio);
+        audioSource = audioContext.createMediaElementSource(audio);
         audioAnalyser = audioContext.createAnalyser();
         audioSource.connect(audioAnalyser);
         audioAnalyser.connect(audioContext.destination);
@@ -157,6 +165,7 @@ export default {
       });
 
       document.querySelector('#last').addEventListener('click', function () {
+        playerStatus.value.playing = true;
         if (playerStatus.value.activeIndex <= 0) {
           playerStatus.value.activeIndex = audioList.length - 1;
         } else {
@@ -167,6 +176,7 @@ export default {
       });
 
       document.querySelector('#next').addEventListener('click', function () {
+        playerStatus.value.playing = true;
         if (playerStatus.value.activeIndex >= audioList.length - 1) {
           playerStatus.value.activeIndex = 0;
         } else {
@@ -179,6 +189,66 @@ export default {
       function render() {
         renderer.render(scene, camera);
       }
+
+      mainContainer.addEventListener('mousemove', function (ev) {
+        const center = {
+          x: mainContainer.clientWidth / 2,
+          y: mainContainer.clientHeight / 2,
+        };
+        const mousePos = {
+          x: ev.clientX,
+          y: ev.clientY,
+        };
+        new TWEEN.Tween({
+          positionX: group.position.x,
+          positionY: group.position.y,
+          rotationX: group.rotation.x,
+          rotationY: group.rotation.y,
+        })
+          .to(
+            {
+              positionX: -(mousePos.x - center.x) / 100,
+              positionY: (mousePos.y - center.y) / 100,
+              rotationX: (mousePos.y - center.y) / 1700,
+              rotationY: (mousePos.x - center.x) / 1700,
+            },
+            10
+          )
+          .easing(TWEEN.Easing.Quadratic.Out)
+          .onUpdate(data => {
+            group.position.x = data.positionX;
+            group.position.y = data.positionY;
+            group.rotation.x = data.rotationX;
+            group.rotation.y = data.rotationY;
+          })
+          .start();
+      });
+
+      mainContainer.addEventListener('mouseout', function (ev) {
+        new TWEEN.Tween({
+          positionX: group.position.x,
+          positionY: group.position.y,
+          rotationX: group.rotation.x,
+          rotationY: group.rotation.y,
+        })
+          .to(
+            {
+              positionX: 0,
+              positionY: 0,
+              rotationX: 0,
+              rotationY: 0,
+            },
+            300
+          )
+          .easing(TWEEN.Easing.Quadratic.Out)
+          .onUpdate(data => {
+            group.position.x = data.positionX;
+            group.position.y = data.positionY;
+            group.rotation.x = data.rotationX;
+            group.rotation.y = data.rotationY;
+          })
+          .start();
+      });
 
       let getAudioDataStep = 0;
       function animate() {
